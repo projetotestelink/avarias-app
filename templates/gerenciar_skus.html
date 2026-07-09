@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar SKUs{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color: #0B4734;"><i class="bi bi-upc-scan"></i> Gerenciar SKU (Depara)</h4>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h6 class="mb-0">Novo SKU</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.codigo.label(class="form-label") }}
+                        {{ form.codigo(class="form-control", placeholder="Código de barras / SKU") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.descricao.label(class="form-label") }}
+                        {{ form.descricao(class="form-control", placeholder="Descrição do item") }}
+                    </div>
+                    <button type="submit" class="btn text-white w-100 fw-bold" style="background-color: #0B4734;">
+                        <i class="bi bi-plus-lg"></i> Cadastrar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm" style="border-left: 4px solid #FEDB00;">
+            <div class="card-header" style="background-color: #FEDB00; color: #000;">
+                <h6 class="mb-0"><i class="bi bi-upload"></i> Importar Planilha</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Envie um CSV com duas colunas: <strong>SKU,Descrição</strong> (sem cabeçalho ou com cabeçalho ignorado).</p>
+                <form method="POST" action="{{ url_for('importar_skus') }}" enctype="multipart/form-data">
+                    {{ import_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ import_form.planilha.label(class="form-label") }}
+                        {{ import_form.planilha(class="form-control", accept=".csv,.txt") }}
+                    </div>
+                    <button type="submit" class="btn w-100 fw-bold" style="background-color: #0B4734; color: white;">
+                        <i class="bi bi-cloud-upload"></i> Importar CSV
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h6 class="mb-0">SKUs Cadastrados</h6>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="mb-3">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Buscar por código ou descrição..." value="{{ search }}">
+                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search"></i></button>
+                    </div>
+                </form>
+
+                {% if pagination.items %}
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Descrição</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sku in pagination.items %}
+                            <tr>
+                                <td><span class="badge bg-dark">{{ sku.codigo }}</span></td>
+                                <td>{{ sku.descricao }}</td>
+                                <td>
+                                    {% if not sku.avarias %}
+                                    <form method="POST" action="{{ url_for('excluir_sku', id=sku.id) }}"
+                                          onsubmit="return confirm('Excluir SKU {{ sku.codigo }}?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">Nenhum SKU cadastrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

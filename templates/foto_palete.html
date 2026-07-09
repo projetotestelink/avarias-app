@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Foto do Palete{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h5 class="mb-0"><i class="bi bi-camera"></i> Vincular Fotos ao Palete</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Use esta opção para anexar fotos gerais de um palete (endereço), facilitando a venda de lote fechado.</p>
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.endereco.label(class="form-label fw-semibold") }}
+                        {{ form.endereco(class="form-control", placeholder="Ex: R-01-A-01") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.observacoes.label(class="form-label fw-semibold") }}
+                        {{ form.observacoes(class="form-control", rows="2", placeholder="Observações sobre o estado do palete...") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.fotos.label(class="form-label fw-semibold") }}
+                        {{ form.fotos(class="form-control", multiple=true, accept="image/*") }}
+                        <small class="text-muted">Selecione uma ou mais fotos do palete.</small>
+                    </div>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">
+                            <i class="bi bi-upload"></i> Enviar Fotos
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

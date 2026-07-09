@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0" style="color: #0B4734;"><i class="bi bi-speedometer2"></i> Dashboard</h4>
+    {% if current_user.role != 'visualizador' %}
+    <a href="{{ url_for('nova_avaria') }}" class="btn text-white fw-bold" style="background-color: #0B4734;">
+        <i class="bi bi-plus-circle"></i> Nova Avarias
+    </a>
+    {% endif %}
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #0B4734, #0D5A3F);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1 opacity-75">Total de Avarias</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_avarias }}</h2>
+                    </div>
+                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #FEDB00, #FFE44D);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1 opacity-75">SKUs Cadastrados</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_skus }}</h2>
+                    </div>
+                    <i class="bi bi-upc-scan fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #1a6e52, #0B4734);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1 opacity-75">Localizações</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_localizacoes }}</h2>
+                    </div>
+                    <i class="bi bi-geo-alt fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header" style="background-color: #0B4734; color: white;">
+        <h6 class="mb-0"><i class="bi bi-clock-history"></i> Últimas Avarias Registradas</h6>
+    </div>
+    <div class="card-body p-0">
+        {% if ultimas_avarias %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>SKU</th>
+                        <th>Descrição</th>
+                        <th>Qtd</th>
+                        <th>Endereço</th>
+                        <th>Área</th>
+                        <th>Usuário</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for avaria in ultimas_avarias %}
+                    <tr>
+                        <td>{{ avaria.id }}</td>
+                        <td><span class="badge bg-dark">{{ avaria.sku_codigo }}</span></td>
+                        <td>{{ avaria.sku_descricao[:40] }}{% if avaria.sku_descricao|length > 40 %}...{% endif %}</td>
+                        <td><span class="badge bg-danger">{{ avaria.quantidade }}</span></td>
+                        <td>{{ avaria.localizacao_rel.endereco }}</td>
+                        <td><span class="badge" style="background-color: #FEDB00; color: #000;">{{ avaria.localizacao_rel.area }}</span></td>
+                        <td>{{ avaria.usuario.username }}</td>
+                        <td><small>{{ avaria.created_at.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                        <td><a href="{{ url_for('detalhes_avaria', id=avaria.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1"></i>
+            <p class="mt-2">Nenhuma avaria registrada ainda.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

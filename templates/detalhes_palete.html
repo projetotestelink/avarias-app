@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Palete {{ localizacao.endereco }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0" style="color: #0B4734;">
+        <i class="bi bi-boxes"></i> Palete: {{ localizacao.endereco }}
+        <span class="badge ms-2" style="background-color: #FEDB00; color: #000;">{{ localizacao.area }}</span>
+    </h4>
+    {% if current_user.role != 'visualizador' %}
+    <a href="{{ url_for('nova_avaria') }}" class="btn btn-sm text-white fw-bold" style="background-color: #0B4734;">
+        <i class="bi bi-plus-circle"></i> Nova Avarias
+    </a>
+    {% endif %}
+</div>
+
+{% if localizacao.observacoes %}
+<div class="alert alert-info py-2">
+    <small><strong>Obs:</strong> {{ localizacao.observacoes }}</small>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Avarias neste Palete</h6>
+            </div>
+            <div class="card-body p-0">
+                {% if avarias %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>SKU</th>
+                                <th>Descrição</th>
+                                <th>Qtd</th>
+                                <th>Observações</th>
+                                <th>Data</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for avaria in avarias %}
+                            <tr>
+                                <td>{{ avaria.id }}</td>
+                                <td><span class="badge bg-dark">{{ avaria.sku_codigo }}</span></td>
+                                <td>{{ avaria.sku_descricao[:40] }}{% if avaria.sku_descricao|length > 40 %}...{% endif %}</td>
+                                <td><span class="badge bg-danger">{{ avaria.quantidade }}</span></td>
+                                <td>
+                                    {% if avaria.observacoes %}
+                                    <span data-bs-toggle="tooltip" title="{{ avaria.observacoes }}">
+                                        {{ avaria.observacoes[:25] }}{% if avaria.observacoes|length > 25 %}...{% endif %}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ avaria.created_at.strftime('%d/%m/%Y') }}</small></td>
+                                <td><a href="{{ url_for('detalhes_avaria', id=avaria.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                    <p class="mt-2">Nenhuma avaria registrada neste palete.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background-color: #FEDB00;">
+                <h6 class="mb-0"><i class="bi bi-camera"></i> Fotos do Palete</h6>
+            </div>
+            <div class="card-body">
+                {% if fotos %}
+                <div class="row g-2">
+                    {% for foto in fotos %}
+                    <div class="col-6 mb-2">
+                        <a href="{{ url_for('uploaded_file', filename=foto.file_path) }}" target="_blank">
+                            <img src="{{ url_for('uploaded_file', filename=foto.file_path) }}"
+                                 class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover;"
+                                 alt="Foto palete {{ localizacao.endereco }}">
+                        </a>
+                        <small class="d-block text-muted">{{ foto.created_at.strftime('%d/%m/%Y') }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">
+                    <i class="bi bi-image fs-2 d-block"></i>
+                    Nenhuma foto do palete.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{{ url_for('relatorios') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+{% endblock %}

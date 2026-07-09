@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: avarias-app
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ORACLE_PASSWORD
+        sync: false
+      - key: ORACLE_WALLET_PASSWORD
+        sync: false

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Usuários{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color: #0B4734;"><i class="bi bi-people"></i> Gerenciar Usuários</h4>
+
+<div class="row">
+    <div class="col-md-5 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h6 class="mb-0">Novo Usuário</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        {{ form.username(class="form-control", placeholder="Nome de usuário") }}
+                        {% for error in form.username.errors %}
+                        <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control", placeholder="email@exemplo.com") }}
+                        {% for error in form.email.errors %}
+                        <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        {{ form.password(class="form-control", placeholder="Mínimo 4 caracteres") }}
+                        {% for error in form.password.errors %}
+                        <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.role.label(class="form-label") }}
+                        {{ form.role(class="form-select") }}
+                    </div>
+                    <button type="submit" class="btn text-white w-100 fw-bold" style="background-color: #0B4734;">
+                        <i class="bi bi-plus-lg"></i> Criar Usuário
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h6 class="mb-0">Usuários</h6>
+            </div>
+            <div class="card-body">
+                {% if usuarios %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Perfil</th>
+                                <th>Ativo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in usuarios %}
+                            <tr>
+                                <td><i class="bi bi-person"></i> {{ user.username }}</td>
+                                <td><small>{{ user.email }}</small></td>
+                                <td>
+                                    {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">Administrador</span>
+                                    {% elif user.role == 'lancador' %}
+                                    <span class="badge" style="background-color: #0B4734;">Lançador</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Visualizador</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_active %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% else %}
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editUser{{ user.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="editUser{{ user.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ url_for('editar_usuario', id=user.id) }}">
+                                            <div class="modal-header" style="background-color: #0B4734; color: white;">
+                                                <h6 class="modal-title">Editar {{ user.username }}</h6>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Perfil</label>
+                                                    <select name="role" class="form-select">
+                                                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrador</option>
+                                                        <option value="lancador" {% if user.role == 'lancador' %}selected{% endif %}>Lançador</option>
+                                                        <option value="visualizador" {% if user.role == 'visualizador' %}selected{% endif %}>Visualizador</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Nova senha (deixe em branco para manter)</label>
+                                                    <input type="password" name="password" class="form-control" placeholder="Nova senha">
+                                                </div>
+                                                <div class="form-check">
+                                                    <input type="checkbox" name="is_active" class="form-check-input" id="active{{ user.id }}" {% if user.is_active %}checked{% endif %}>
+                                                    <label class="form-check-label" for="active{{ user.id }}">Usuário ativo</label>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn text-white" style="background-color: #0B4734;">Salvar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">Nenhum usuário cadastrado.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

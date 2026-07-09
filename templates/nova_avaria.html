@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Nova Avarias{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Registrar Avarias</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="formAvarias">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Código SKU <i class="bi bi-upc-scan text-muted"></i></label>
+                            <div class="input-group">
+                                {{ form.sku_codigo(class="form-control form-control-lg", placeholder="Bipe ou digite o SKU", id="sku_codigo", autofocus=true) }}
+                                <button class="btn btn-outline-secondary" type="button" id="btnBuscarSKU">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="skuStatus" class="mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.sku_descricao.label(class="form-label fw-semibold") }}
+                            {{ form.sku_descricao(class="form-control", id="sku_descricao", readonly=true, style="background-color: #f8f9fa;") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.endereco.label(class="form-label fw-semibold") }}
+                            <div class="input-group">
+                                {{ form.endereco(class="form-control", placeholder="Ex: R-01-A-01", id="endereco") }}
+                                <button class="btn btn-outline-secondary" type="button" id="btnBuscarEndereco">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                            <div id="enderecoStatus" class="mt-1"></div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.area.label(class="form-label fw-semibold") }}
+                            {{ form.area(class="form-select", id="area") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            {{ form.quantidade.label(class="form-label fw-semibold") }}
+                            {{ form.quantidade(class="form-control", type="number", min="1", placeholder="0") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.observacoes.label(class="form-label fw-semibold") }}
+                        {{ form.observacoes(class="form-control", rows="3", placeholder="Descreva detalhes da avaria...") }}
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-image"></i> Fotos do Item Específico
+                            </label>
+                            <input type="file" name="fotos_item" class="form-control" multiple accept="image/*">
+                            <small class="text-muted">Avaria muito visível? Tire fotos do item danificado.</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-palette"></i> Fotos do Palete Inteiro
+                            </label>
+                            <input type="file" name="fotos_palete" class="form-control" multiple accept="image/*">
+                            <small class="text-muted">Foto geral do palete para venda de lote fechado.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">
+                            <i class="bi bi-check-lg"></i> Registrar Avarias
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let skuTimer, enderecoTimer;
+
+function buscarSKU(codigo) {
+    const status = document.getElementById('skuStatus');
+    if (codigo.length < 7) return;
+    fetch('/api/sku/' + encodeURIComponent(codigo))
+        .then(r => r.json())
+        .then(data => {
+            const descField = document.getElementById('sku_descricao');
+            if (data.found) {
+                descField.value = data.descricao;
+                descField.readOnly = true;
+                descField.style.backgroundColor = '#f8f9fa';
+                status.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> SKU encontrado</small>';
+            } else {
+                descField.value = '';
+                descField.readOnly = false;
+                descField.style.backgroundColor = '#fff';
+                status.innerHTML = '<small class="text-muted"><i class="bi bi-plus-circle"></i> SKU não encontrado — preencha a descrição manualmente</small>';
+            }
+        });
+}
+
+document.getElementById('sku_codigo')?.addEventListener('input', function() {
+    clearTimeout(skuTimer);
+    const codigo = this.value.trim();
+    if (codigo.length >= 7) {
+        skuTimer = setTimeout(() => buscarSKU(codigo), 400);
+    }
+});
+
+document.getElementById('btnBuscarSKU')?.addEventListener('click', function() {
+    const codigo = document.getElementById('sku_codigo').value.trim();
+    if (codigo.length >= 7) buscarSKU(codigo);
+});
+
+document.getElementById('sku_codigo')?.addEventListener('blur', function() {
+    const codigo = this.value.trim();
+    if (codigo.length >= 7) buscarSKU(codigo);
+});
+
+function buscarEndereco(endereco) {
+    const status = document.getElementById('enderecoStatus');
+    if (endereco.length < 7) return;
+    fetch('/api/localizacao/' + encodeURIComponent(endereco))
+        .then(r => r.json())
+        .then(data => {
+            const areaField = document.getElementById('area');
+            if (data.found) {
+                areaField.value = data.area;
+                areaField.disabled = true;
+                status.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Endereço encontrado - Área: ' + data.area + '</small>';
+            } else {
+                areaField.value = '';
+                areaField.disabled = false;
+                status.innerHTML = '<small class="text-muted"><i class="bi bi-plus-circle"></i> Novo endereço - informe a área</small>';
+            }
+        });
+}
+
+document.getElementById('endereco')?.addEventListener('input', function() {
+    clearTimeout(enderecoTimer);
+    const endereco = this.value.trim();
+    if (endereco.length >= 7) {
+        enderecoTimer = setTimeout(() => buscarEndereco(endereco), 400);
+    }
+});
+
+document.getElementById('btnBuscarEndereco')?.addEventListener('click', function() {
+    const endereco = document.getElementById('endereco').value.trim();
+    if (endereco.length >= 7) buscarEndereco(endereco);
+});
+
+document.getElementById('endereco')?.addEventListener('blur', function() {
+    const endereco = this.value.trim();
+    if (endereco.length >= 7) buscarEndereco(endereco);
+});
+</script>
+{% endblock %}

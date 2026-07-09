@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Avarias #{{ avaria.id }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header text-white" style="background-color: #0B4734;">
+                <h5 class="mb-0"><i class="bi bi-file-text"></i> Avarias #{{ avaria.id }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <small class="text-muted">SKU</small>
+                        <p class="fw-bold mb-0"><span class="badge bg-dark fs-6">{{ avaria.sku_codigo }}</span></p>
+                    </div>
+                    <div class="col-md-8">
+                        <small class="text-muted">Descrição</small>
+                        <p class="fw-bold mb-0">{{ avaria.sku_descricao }}</p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <small class="text-muted">Quantidade com Avaria</small>
+                        <p class="fw-bold mb-0 text-danger fs-5">{{ avaria.quantidade }} unidade(s)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Endereço</small>
+                        <p class="fw-bold mb-0">
+                            <a href="{{ url_for('detalhes_palete', endereco=avaria.localizacao_rel.endereco) }}" class="text-decoration-none">
+                                {{ avaria.localizacao_rel.endereco }}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Área</small>
+                        <p class="mb-0"><span class="badge" style="background-color: #FEDB00; color: #000;">{{ avaria.localizacao_rel.area }}</span></p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Usuário</small>
+                        <p class="mb-0">{{ avaria.usuario.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Data do Registro</small>
+                        <p class="mb-0">{{ avaria.created_at.strftime('%d/%m/%Y às %H:%M') }}</p>
+                    </div>
+                </div>
+                {% if avaria.observacoes %}
+                <div class="mb-0">
+                    <small class="text-muted">Observações</small>
+                    <p class="mb-0">{{ avaria.observacoes }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        {% if avaria.fotos %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background-color: #FEDB00;">
+                <h6 class="mb-0"><i class="bi bi-images"></i> Fotos do Item</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    {% for foto in avaria.fotos %}
+                    <div class="col-6">
+                        <a href="{{ url_for('uploaded_file', filename=foto.file_path) }}" target="_blank">
+                            <img src="{{ url_for('uploaded_file', filename=foto.file_path) }}"
+                                 class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"
+                                 alt="Foto avaria">
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if fotos_palete %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header" style="background-color: #0B4734; color: white;">
+                <h6 class="mb-0"><i class="bi bi-palette"></i> Fotos do Palete</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    {% for foto in fotos_palete %}
+                    <div class="col-6">
+                        <a href="{{ url_for('uploaded_file', filename=foto.file_path) }}" target="_blank">
+                            <img src="{{ url_for('uploaded_file', filename=foto.file_path) }}"
+                                 class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"
+                                 alt="Foto palete">
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-2">
+    <a href="{{ url_for('relatorios') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    <a href="{{ url_for('detalhes_palete', endereco=avaria.localizacao_rel.endereco) }}" class="btn btn-outline-primary">
+        <i class="bi bi-boxes"></i> Ver Palete Completo
+    </a>
+    {% if current_user.role == 'admin' %}
+    <form method="POST" action="{{ url_for('excluir_avaria', id=avaria.id) }}" class="d-inline"
+          onsubmit="return confirm('Excluir esta avaria? Esta ação não pode ser desfeita.');">
+        <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Excluir</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

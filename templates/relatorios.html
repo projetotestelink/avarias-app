@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Relatórios{% endblock %}
+{% block content %}
+<h4 class="mb-3" style="color: #0B4734;"><i class="bi bi-table"></i> Relatório de Avarias</h4>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small">SKU</label>
+                <input type="text" name="sku" class="form-control form-control-sm" placeholder="Buscar SKU..." value="{{ sku_filter }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small">Endereço</label>
+                <input type="text" name="endereco" class="form-control form-control-sm" placeholder="Ex: R-01..." value="{{ endereco_filter }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Área</label>
+                <select name="area" class="form-select form-select-sm">
+                    <option value="">Todas</option>
+                    {% for area in areas %}
+                    <option value="{{ area }}" {% if area_filter == area %}selected{% endif %}>{{ area }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Data Início</label>
+                <input type="date" name="data_inicio" class="form-control form-control-sm" value="{{ data_inicio }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small">Data Fim</label>
+                <input type="date" name="data_fim" class="form-control form-control-sm" value="{{ data_fim }}">
+            </div>
+            <div class="col-md-12 mt-2 d-grid">
+                <button type="submit" class="btn btn-sm text-white" style="background-color: #0B4734;">
+                    <i class="bi bi-funnel"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if resumo_enderecos %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header" style="background-color: #0B4734; color: white;">
+        <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Resumo por Endereço</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Endereço</th>
+                        <th>Área</th>
+                        <th>SKUs Diferentes</th>
+                        <th>Total Unidades</th>
+                        <th>Lançamentos</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in resumo_enderecos %}
+                    <tr>
+                        <td><strong>{{ r.endereco }}</strong></td>
+                        <td><span class="badge" style="background-color: #FEDB00; color: #000;">{{ r.area }}</span></td>
+                        <td><span class="badge bg-dark">{{ r.total_skus }}</span></td>
+                        <td><span class="badge bg-danger">{{ r.total_unidades }}</span></td>
+                        <td>{{ r.total_linhas }}</td>
+                        <td>
+                            <a href="{{ url_for('detalhes_palete', endereco=r.endereco) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-boxes"></i> Ver Palete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        {% if pagination.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>SKU</th>
+                        <th>Descrição</th>
+                        <th>Qtd</th>
+                        <th>Endereço</th>
+                        <th>Área</th>
+                        <th>Observações</th>
+                        <th>Fotos</th>
+                        <th>Usuário</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for avaria in pagination.items %}
+                    <tr>
+                        <td>{{ avaria.id }}</td>
+                        <td><span class="badge bg-dark">{{ avaria.sku_codigo }}</span></td>
+                        <td>{{ avaria.sku_descricao[:45] }}{% if avaria.sku_descricao|length > 45 %}...{% endif %}</td>
+                        <td><span class="badge bg-danger">{{ avaria.quantidade }}</span></td>
+                        <td>
+                            <a href="{{ url_for('detalhes_palete', endereco=avaria.localizacao_rel.endereco) }}" class="text-decoration-none">
+                                {{ avaria.localizacao_rel.endereco }}
+                            </a>
+                        </td>
+                        <td><span class="badge" style="background-color: #FEDB00; color: #000;">{{ avaria.localizacao_rel.area }}</span></td>
+                        <td>
+                            {% if avaria.observacoes %}
+                            <span data-bs-toggle="tooltip" title="{{ avaria.observacoes }}">
+                                {{ avaria.observacoes[:30] }}{% if avaria.observacoes|length > 30 %}...{% endif %}
+                            </span>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if avaria.fotos %}
+                            <i class="bi bi-camera-fill text-success" title="{{ avaria.fotos|length }} foto(s)"></i>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ avaria.usuario.username }}</small></td>
+                        <td><small>{{ avaria.created_at.strftime('%d/%m/%Y') }}</small></td>
+                        <td>
+                            <a href="{{ url_for('detalhes_avaria', id=avaria.id) }}" class="btn btn-sm btn-outline-secondary" title="Detalhes">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-search fs-1"></i>
+            <p class="mt-2">Nenhuma avaria encontrada com esses filtros.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('relatorios', page=page_num, sku=sku_filter, endereco=endereco_filter, area=area_filter, data_inicio=data_inicio, data_fim=data_fim) }}">{{ page_num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

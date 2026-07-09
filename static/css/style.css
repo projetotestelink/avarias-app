@@ -1,0 +1,140 @@
+:root {
+    --primary: #0B4734;
+    --primary-dark: #083826;
+    --primary-light: #0D5A3F;
+    --accent: #FEDB00;
+    --accent-hover: #E5C500;
+    --accent-light: #FFF3B0;
+    --bg-light: #F8F9FA;
+    --text-dark: #212529;
+    --white: #FFFFFF;
+    --danger: #DC3545;
+    --success: #198754;
+}
+
+body {
+    background-color: var(--bg-light);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container-fluid {
+    flex: 1;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar .nav-link {
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.navbar .nav-link:hover {
+    opacity: 0.85;
+}
+
+.navbar .dropdown-menu {
+    border-top: 3px solid var(--accent);
+}
+
+.card {
+    border: none;
+    border-radius: 8px;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+}
+
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+a {
+    color: var(--primary-light);
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.pagination .page-link {
+    color: var(--primary);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(11, 71, 52, 0.15);
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.table > :not(caption) > * > * {
+    vertical-align: middle;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.alert-warning {
+    background-color: var(--accent-light);
+    border-color: var(--accent);
+    color: #856404;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.footer {
+    margin-top: auto !important;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand span {
+        font-size: 0.9rem;
+    }
+}
