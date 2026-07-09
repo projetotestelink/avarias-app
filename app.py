@@ -8,6 +8,9 @@ from flask_login import (LoginManager, login_user, logout_user,
                          login_required, current_user)
 from werkzeug.utils import secure_filename
 
+import cloudinary
+import cloudinary.uploader
+
 from config import Config
 from models import db, User, SKU, Localizacao, Avaria, FotoAvaria, FotoPalete
 from forms import (LoginForm, UserForm, SKUForm, SKUImportForm, LocalizacaoForm,
@@ -16,7 +19,21 @@ from forms import (LoginForm, UserForm, SKUForm, SKUImportForm, LocalizacaoForm,
 app = Flask(__name__)
 app.config.from_object(Config)
 
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME') or 'dwuk4imd',
+    api_key=os.environ.get('CLOUDINARY_API_KEY') or '313666729677654',
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET') or 'MjCHJjIfIYx0J75__Vbp68byPmM',
+    secure=True
+)
+
 db.init_app(app)
+
+@app.template_filter('image_url')
+def image_url(path):
+    if path and (path.startswith('http://') or path.startswith('https://')):
+        return path
+    return url_for('uploaded_file', filename=path)
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Faça login para acessar esta página.'
@@ -29,15 +46,14 @@ def allowed_file(filename):
 
 def save_photos(files, subfolder):
     saved_paths = []
-    upload_dir = os.path.join(app.config['UPLOAD_FOLDER'], subfolder)
-    os.makedirs(upload_dir, exist_ok=True)
     for file in files:
         if file and file.filename and allowed_file(file.filename):
-            ext = file.filename.rsplit('.', 1)[1].lower()
-            filename = f"{uuid.uuid4().hex}.{ext}"
-            filepath = os.path.join(upload_dir, filename)
-            file.save(filepath)
-            saved_paths.append(f"{subfolder}/{filename}")
+            result = cloudinary.uploader.upload(
+                file,
+                folder=f"avarias-app/{subfolder}",
+                resource_type="image"
+            )
+            saved_paths.append(result["secure_url"])
     return saved_paths
 
 
