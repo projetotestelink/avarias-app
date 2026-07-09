@@ -101,6 +101,14 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="mb-3">
+                                                    <label class="form-label">Nome de usuário</label>
+                                                    <input type="text" name="username" class="form-control" value="{{ user.username }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Email</label>
+                                                    <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                                                </div>
+                                                <div class="mb-3">
                                                     <label class="form-label">Perfil</label>
                                                     <select name="role" class="form-select">
                                                         <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Administrador</option>
@@ -122,6 +130,16 @@
                                                 <button type="submit" class="btn text-white" style="background-color: #0B4734;">Salvar</button>
                                             </div>
                                         </form>
+                                        {% if user.username != 'admin' %}
+                                        <div class="px-3 pb-3">
+                                            <form method="POST" action="{{ url_for('excluir_usuario', id=user.id) }}"
+                                                  onsubmit="return confirm('Excluir usuário {{ user.username }}? Esta ação não pode ser desfeita.');">
+                                                <button type="submit" class="btn btn-outline-danger w-100 mt-2">
+                                                    <i class="bi bi-trash"></i> Excluir Usuário
+                                                </button>
+                                            </form>
+                                        </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

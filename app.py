@@ -139,11 +139,20 @@ def dashboard():
     total_skus = SKU.query.count()
     total_localizacoes = Localizacao.query.count()
     ultimas_avarias = Avaria.query.order_by(Avaria.created_at.desc()).limit(10).all()
+
+    from sqlalchemy import func
+    areas_data = db.session.query(
+        Localizacao.area,
+        func.sum(Avaria.quantidade).label('total')
+    ).join(Avaria, Localizacao.id == Avaria.localizacao_id
+    ).group_by(Localizacao.area).order_by(func.sum(Avaria.quantidade).desc()).all()
+
     return render_template('dashboard.html',
                          total_avarias=total_avarias,
                          total_skus=total_skus,
                          total_localizacoes=total_localizacoes,
-                         ultimas_avarias=ultimas_avarias)
+                         ultimas_avarias=ultimas_avarias,
+                         areas_data=areas_data)
 
 
 @app.route('/avaria/nova', methods=['GET', 'POST'])
@@ -392,11 +401,11 @@ def excluir_sku(id):
     if not sku:
         abort(404)
     if sku.avarias:
-        flash('Não é possível excluir SKU com avarias vinculadas.', 'danger')
-        return redirect(url_for('gerenciar_skus'))
+        for avaria in sku.avarias:
+            db.session.delete(avaria)
     db.session.delete(sku)
     db.session.commit()
-    flash('SKU excluído!', 'success')
+    flash(f'SKU {sku.codigo} e {len(sku.avarias)} avaria(s) vinculada(s) foram excluídos!', 'success')
     return redirect(url_for('gerenciar_skus'))
 
 
@@ -529,9 +538,20 @@ def editar_usuario(id):
     user = db.session.get(User, id)
     if not user:
         abort(404)
-    if current_user.id == user.id and request.form.get('role') != user.role:
-        flash('Você não pode alterar seu próprio perfil.', 'danger')
-        return redirect(url_for('gerenciar_usuarios'))
+    username = request.form.get('username', '').strip()
+    email = request.form.get('email', '').strip()
+    if username:
+        duplicado = User.query.filter(User.username == username, User.id != id).first()
+        if duplicado:
+            flash('Nome de usuário já em uso.', 'danger')
+            return redirect(url_for('gerenciar_usuarios'))
+        user.username = username
+    if email:
+        duplicado = User.query.filter(User.email == email, User.id != id).first()
+        if duplicado:
+            flash('Email já em uso.', 'danger')
+            return redirect(url_for('gerenciar_usuarios'))
+        user.email = email
     user.role = request.form.get('role', user.role)
     user.is_active = request.form.get('is_active') == 'on'
     password = request.form.get('password')
@@ -539,6 +559,25 @@ def editar_usuario(id):
         user.set_password(password)
     db.session.commit()
     flash('Usuário atualizado!', 'success')
+    return redirect(url_for('gerenciar_usuarios'))
+
+
+@app.route('/gerenciar/usuarios/<int:id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_usuario(id):
+    user = db.session.get(User, id)
+    if not user:
+        abort(404)
+    if user.username == 'admin':
+        flash('Não é possível excluir o usuário admin.', 'danger')
+        return redirect(url_for('gerenciar_usuarios'))
+    if current_user.id == user.id:
+        flash('Você não pode excluir seu próprio usuário.', 'danger')
+        return redirect(url_for('gerenciar_usuarios'))
+    db.session.delete(user)
+    db.session.commit()
+    flash('Usuário excluído!', 'success')
     return redirect(url_for('gerenciar_usuarios'))
 
 

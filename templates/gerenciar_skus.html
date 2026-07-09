@@ -76,12 +76,10 @@
                                 <td><span class="badge bg-dark">{{ sku.codigo }}</span></td>
                                 <td>{{ sku.descricao }}</td>
                                 <td>
-                                    {% if not sku.avarias %}
                                     <form method="POST" action="{{ url_for('excluir_sku', id=sku.id) }}"
-                                          onsubmit="return confirm('Excluir SKU {{ sku.codigo }}?');">
+                                          onsubmit="return confirm('Excluir SKU {{ sku.codigo }}{% if sku.avarias %} e {{ sku.avarias|length }} avaria(s) vinculada(s){% endif %}?');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
                                     </form>
-                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
