@@ -13,10 +13,10 @@ if not os.path.exists(wallet_dir_simple) and os.path.exists(wallet_dir):
 import oracledb
 oracledb.defaults.config_dir = wallet_dir_simple
 oracledb.defaults.wallet_location = wallet_dir_simple
-oracledb.defaults.wallet_password = os.environ.get('ORACLE_WALLET_PASSWORD', 'Larissa@240569')
+oracledb.defaults.wallet_password = os.environ.get('ORACLE_WALLET_PASSWORD')
 
 ORACLE_USER = os.environ.get('ORACLE_USER', 'ADMIN')
-ORACLE_PASSWORD = os.environ.get('ORACLE_PASSWORD', 'Larissa@240569')
+ORACLE_PASSWORD = os.environ.get('ORACLE_PASSWORD')
 ORACLE_DSN = os.environ.get('ORACLE_DSN', 'avariasdb_high')
 
 
