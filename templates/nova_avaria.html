@@ -139,8 +139,8 @@ function buscarEndereco(endereco) {
             const areaField = document.getElementById('area');
             if (data.found) {
                 areaField.value = data.area;
-                areaField.disabled = true;
-                status.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Endereço encontrado - Área: ' + data.area + '</small>';
+                areaField.disabled = false;
+                status.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Endereço encontrado - Área atual: ' + data.area + ' (pode alterar se necessário)</small>';
             } else {
                 areaField.value = '';
                 areaField.disabled = false;
