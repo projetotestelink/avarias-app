@@ -594,6 +594,31 @@ def not_found(e):
     return render_template('404.html'), 404
 
 
+@app.route('/migrar')
+def migrar():
+    from sqlalchemy import inspect as sa_inspect
+    inspector = sa_inspect(db.engine)
+    cols = [c['name'] for c in inspector.get_columns('usuarios')]
+    alterou = False
+    if 'username' in cols and 'matricula' not in cols:
+        db.session.execute(db.text('ALTER TABLE usuarios RENAME COLUMN username TO matricula'))
+        alterou = True
+    elif 'username' in cols and 'matricula' in cols:
+        db.session.execute(db.text('ALTER TABLE usuarios DROP COLUMN username'))
+        alterou = True
+    if 'nome' not in cols:
+        db.session.execute(db.text('ALTER TABLE usuarios ADD (nome VARCHAR2(120))'))
+        alterou = True
+    if alterou:
+        db.session.commit()
+        admin = User.query.filter_by(matricula='admin').first()
+        if admin and not admin.nome:
+            admin.nome = 'Administrador'
+            db.session.commit()
+        return 'Migração concluída! <a href="/login">Ir para login</a>'
+    return 'Nada a migrar. <a href="/login">Ir para login</a>'
+
+
 def init_admin():
     admin = User.query.filter_by(matricula='admin').first()
     if not admin:
