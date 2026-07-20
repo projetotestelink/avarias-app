@@ -10,8 +10,9 @@ class User(UserMixin, db.Model):
     __tablename__ = 'usuarios'
 
     id = db.Column(db.Integer, db.Identity(always=False), primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    matricula = db.Column(db.String(80), unique=True, nullable=False)
+    nome = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=True)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='visualizador')
     is_active = db.Column(db.Boolean, default=True)
@@ -26,7 +27,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.matricula}>'
 
 
 class SKU(db.Model):

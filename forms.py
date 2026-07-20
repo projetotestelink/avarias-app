@@ -4,13 +4,14 @@ from wtforms.validators import DataRequired, Email, Length, Optional
 
 
 class LoginForm(FlaskForm):
-    username = StringField('Usuário', validators=[DataRequired()])
+    matricula = StringField('Matrícula', validators=[DataRequired()])
     password = PasswordField('Senha', validators=[DataRequired()])
 
 
 class UserForm(FlaskForm):
-    username = StringField('Usuário', validators=[DataRequired(), Length(min=3, max=80)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    matricula = StringField('Matrícula', validators=[DataRequired(), Length(min=3, max=80)])
+    nome = StringField('Nome', validators=[DataRequired(), Length(max=120)])
+    email = StringField('Email', validators=[Optional(), Email()])
     password = PasswordField('Senha', validators=[Optional(), Length(min=4, max=100)])
     role = SelectField('Perfil', choices=[
         ('admin', 'Administrador'),

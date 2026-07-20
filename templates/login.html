@@ -11,9 +11,9 @@
                 <form method="POST">
                     {{ form.hidden_tag() }}
                     <div class="mb-3 text-start">
-                        {{ form.username.label(class="form-label") }}
-                        {{ form.username(class="form-control", placeholder="Digite seu usuário") }}
-                        {% for error in form.username.errors %}
+                        {{ form.matricula.label(class="form-label") }}
+                        {{ form.matricula(class="form-control", placeholder="Digite sua matrícula") }}
+                        {% for error in form.matricula.errors %}
                         <small class="text-danger">{{ error }}</small>
                         {% endfor %}
                     </div>

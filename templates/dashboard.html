@@ -98,7 +98,7 @@
                                 <td><span class="badge bg-danger">{{ avaria.quantidade }}</span></td>
                                 <td>{{ avaria.localizacao_rel.endereco }}</td>
                                 <td><span class="badge" style="background-color: #FEDB00; color: #000;">{{ avaria.localizacao_rel.area }}</span></td>
-                                <td>{{ avaria.usuario.username }}</td>
+                                <td>{{ avaria.usuario.nome }}</td>
                                 <td><small>{{ avaria.created_at.strftime('%d/%m/%Y %H:%M') }}</small></td>
                                 <td><a href="{{ url_for('detalhes_avaria', id=avaria.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a></td>
                             </tr>
@@ -119,7 +119,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/chart.umd.min.js') }}"></script>
 <script>
 const ctx = document.getElementById('graficoAreas');
 if (ctx) {

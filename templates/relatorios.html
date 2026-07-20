@@ -129,7 +129,7 @@
                             <span class="text-muted">-</span>
                             {% endif %}
                         </td>
-                        <td><small>{{ avaria.usuario.username }}</small></td>
+                        <td><small>{{ avaria.usuario.nome }}</small></td>
                         <td><small>{{ avaria.created_at.strftime('%d/%m/%Y') }}</small></td>
                         <td>
                             <a href="{{ url_for('detalhes_avaria', id=avaria.id) }}" class="btn btn-sm btn-outline-secondary" title="Detalhes">

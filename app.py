@@ -114,7 +114,7 @@ def login():
         return redirect(url_for('dashboard'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(matricula=form.matricula.data).first()
         if user and user.is_active and user.check_password(form.password.data):
             login_user(user)
             next_page = request.args.get('next')
@@ -509,15 +509,14 @@ def detalhes_palete(endereco):
 def gerenciar_usuarios():
     form = UserForm()
     if form.validate_on_submit():
-        existente = User.query.filter(
-            (User.username == form.username.data) | (User.email == form.email.data)
-        ).first()
+        existente = User.query.filter_by(matricula=form.matricula.data).first()
         if existente:
-            flash('Usuário ou email já cadastrado!', 'warning')
+            flash('Matrícula já cadastrada!', 'warning')
         else:
             user = User(
-                username=form.username.data,
-                email=form.email.data,
+                matricula=form.matricula.data,
+                nome=form.nome.data,
+                email=form.email.data or None,
                 role=form.role.data
             )
             if form.password.data:
@@ -527,7 +526,7 @@ def gerenciar_usuarios():
             flash('Usuário criado com sucesso!', 'success')
         return redirect(url_for('gerenciar_usuarios'))
 
-    usuarios = User.query.order_by(User.username).all()
+    usuarios = User.query.order_by(User.matricula).all()
     return render_template('gerenciar_usuarios.html', form=form, usuarios=usuarios)
 
 
@@ -538,20 +537,18 @@ def editar_usuario(id):
     user = db.session.get(User, id)
     if not user:
         abort(404)
-    username = request.form.get('username', '').strip()
+    matricula = request.form.get('matricula', '').strip()
+    nome = request.form.get('nome', '').strip()
     email = request.form.get('email', '').strip()
-    if username:
-        duplicado = User.query.filter(User.username == username, User.id != id).first()
+    if matricula:
+        duplicado = User.query.filter(User.matricula == matricula, User.id != id).first()
         if duplicado:
-            flash('Nome de usuário já em uso.', 'danger')
+            flash('Matrícula já em uso.', 'danger')
             return redirect(url_for('gerenciar_usuarios'))
-        user.username = username
-    if email:
-        duplicado = User.query.filter(User.email == email, User.id != id).first()
-        if duplicado:
-            flash('Email já em uso.', 'danger')
-            return redirect(url_for('gerenciar_usuarios'))
-        user.email = email
+        user.matricula = matricula
+    if nome:
+        user.nome = nome
+    user.email = email or None
     user.role = request.form.get('role', user.role)
     user.is_active = request.form.get('is_active') == 'on'
     password = request.form.get('password')
@@ -569,7 +566,7 @@ def excluir_usuario(id):
     user = db.session.get(User, id)
     if not user:
         abort(404)
-    if user.username == 'admin':
+    if user.matricula == 'admin':
         flash('Não é possível excluir o usuário admin.', 'danger')
         return redirect(url_for('gerenciar_usuarios'))
     if current_user.id == user.id:
@@ -598,11 +595,11 @@ def not_found(e):
 
 
 def init_admin():
-    admin = User.query.filter_by(username='admin').first()
+    admin = User.query.filter_by(matricula='admin').first()
     if not admin:
         admin = User(
-            username='admin',
-            email='admin@avarias.com',
+            matricula='admin',
+            nome='Administrador',
             role='admin'
         )
         admin.set_password('admin123')
