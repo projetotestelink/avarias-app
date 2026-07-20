@@ -396,6 +396,28 @@ def importar_skus():
     return redirect(url_for('gerenciar_skus'))
 
 
+@app.route('/gerenciar/skus/<int:id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_sku(id):
+    sku = db.session.get(SKU, id)
+    if not sku:
+        abort(404)
+    codigo = request.form.get('codigo', '').strip()
+    descricao = request.form.get('descricao', '').strip()
+    if codigo:
+        duplicado = SKU.query.filter(SKU.codigo == codigo, SKU.id != id).first()
+        if duplicado:
+            flash('Código SKU já cadastrado.', 'danger')
+            return redirect(url_for('gerenciar_skus'))
+        sku.codigo = codigo
+    if descricao:
+        sku.descricao = descricao
+    db.session.commit()
+    flash('SKU atualizado!', 'success')
+    return redirect(url_for('gerenciar_skus'))
+
+
 @app.route('/gerenciar/skus/<int:id>/excluir', methods=['POST'])
 @login_required
 @admin_required
