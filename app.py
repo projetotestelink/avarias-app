@@ -413,6 +413,9 @@ def editar_sku(id):
         sku.codigo = codigo
     if descricao:
         sku.descricao = descricao
+    db.session.flush()
+    if descricao:
+        Avaria.query.filter_by(sku_id=sku.id).update({'sku_descricao': descricao})
     db.session.commit()
     flash('SKU atualizado!', 'success')
     return redirect(url_for('gerenciar_skus'))
