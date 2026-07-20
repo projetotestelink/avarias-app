@@ -612,14 +612,24 @@ def migrar():
     if 'nome' not in cols:
         db.session.execute(db.text('ALTER TABLE usuarios ADD (nome VARCHAR2(120))'))
         alterou = True
+    try:
+        db.session.execute(db.text('ALTER TABLE usuarios MODIFY (email NULL)'))
+        alterou = True
+    except Exception:
+        pass
     if alterou:
         db.session.commit()
         admin = User.query.filter_by(matricula='admin').first()
         if admin and not admin.nome:
             admin.nome = 'Administrador'
             db.session.commit()
-        return 'Migração concluída! <a href="/login">Ir para login</a>'
-    return 'Nada a migrar. <a href="/login">Ir para login</a>'
+    if not User.query.filter_by(matricula='31674').first():
+        user = User(matricula='31674', nome='Felipe Gomes', role='admin')
+        user.set_password('1234')
+        db.session.add(user)
+        db.session.commit()
+        return 'Migração concluída! Usuário 31674 criado. <a href="/login">Ir para login</a>'
+    return 'Migração concluída! <a href="/login">Ir para login</a>'
 
 
 def init_admin():
