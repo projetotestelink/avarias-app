@@ -575,9 +575,14 @@ def excluir_usuario(id):
     if current_user.id == user.id:
         flash('Você não pode excluir seu próprio usuário.', 'danger')
         return redirect(url_for('gerenciar_usuarios'))
-    db.session.delete(user)
-    db.session.commit()
-    flash('Usuário excluído!', 'success')
+    from sqlalchemy.exc import IntegrityError
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        flash('Usuário excluído!', 'success')
+    except IntegrityError:
+        db.session.rollback()
+        flash('Não é possível excluir: usuário possui registros vinculados (avarias, fotos).', 'danger')
     return redirect(url_for('gerenciar_usuarios'))
 
 
