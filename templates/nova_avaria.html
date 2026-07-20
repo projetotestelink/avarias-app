@@ -166,5 +166,11 @@ document.getElementById('endereco')?.addEventListener('blur', function() {
     const endereco = this.value.trim();
     if (endereco.length >= 7) buscarEndereco(endereco);
 });
+
+document.getElementById('formAvarias')?.addEventListener('submit', function() {
+    const btn = this.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Registrando...';
+});
 </script>
 {% endblock %}
