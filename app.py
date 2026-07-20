@@ -197,17 +197,6 @@ def nova_avaria():
             for path in paths:
                 db.session.add(FotoAvaria(avaria_id=avaria.id, file_path=path))
 
-        fotos_palete = request.files.getlist('fotos_palete')
-        if fotos_palete and any(f.filename for f in fotos_palete):
-            paths = save_photos([f for f in fotos_palete if f.filename], 'fotos_paletes')
-            for path in paths:
-                db.session.add(FotoPalete(
-                    localizacao_id=localizacao.id,
-                    file_path=path,
-                    user_id=current_user.id,
-                    observacoes=f"Vinculado à avaria #{avaria.id}"
-                ))
-
         db.session.commit()
         flash('Avarias registrada com sucesso!', 'success')
         return redirect(url_for('relatorios'))

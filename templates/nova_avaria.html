@@ -57,21 +57,12 @@
                         {{ form.observacoes(class="form-control", rows="3", placeholder="Descreva detalhes da avaria...") }}
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="bi bi-image"></i> Fotos do Item Específico
-                            </label>
-                            <input type="file" name="fotos_item" class="form-control" multiple accept="image/*">
-                            <small class="text-muted">Avaria muito visível? Tire fotos do item danificado.</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                <i class="bi bi-palette"></i> Fotos do Palete Inteiro
-                            </label>
-                            <input type="file" name="fotos_palete" class="form-control" multiple accept="image/*">
-                            <small class="text-muted">Foto geral do palete para venda de lote fechado.</small>
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-image"></i> Fotos do Item
+                        </label>
+                        <input type="file" name="fotos_item" class="form-control" multiple accept="image/*">
+                        <small class="text-muted">Avaria muito visível? Tire fotos do item danificado.</small>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
