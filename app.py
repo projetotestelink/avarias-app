@@ -138,9 +138,11 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    from sqlalchemy import func, distinct
     total_avarias = Avaria.query.count()
-    total_skus = SKU.query.count()
     total_localizacoes = Localizacao.query.count()
+    skus_com_avaria = db.session.query(func.count(distinct(Avaria.sku_id))).scalar() or 0
+    total_unidades_avaria = db.session.query(func.coalesce(func.sum(Avaria.quantidade), 0)).scalar() or 0
     ultimas_avarias = Avaria.query.order_by(Avaria.created_at.desc()).limit(10).all()
 
     from sqlalchemy import func
@@ -152,8 +154,9 @@ def dashboard():
 
     return render_template('dashboard.html',
                          total_avarias=total_avarias,
-                         total_skus=total_skus,
                          total_localizacoes=total_localizacoes,
+                         skus_com_avaria=skus_com_avaria,
+                         total_unidades_avaria=total_unidades_avaria,
                          ultimas_avarias=ultimas_avarias,
                          areas_data=areas_data)
 
@@ -328,7 +331,8 @@ def gerenciar_skus():
             SKU.codigo.like(f'%{search}%') | SKU.descricao.like(f'%{search}%')
         )
     pagination = query.order_by(SKU.codigo).paginate(page=page, per_page=30, error_out=False)
-    return render_template('gerenciar_skus.html', form=form, import_form=import_form, pagination=pagination, search=search)
+    total_skus = SKU.query.count()
+    return render_template('gerenciar_skus.html', form=form, import_form=import_form, pagination=pagination, search=search, total_skus=total_skus)
 
 
 @app.route('/gerenciar/skus/importar', methods=['POST'])

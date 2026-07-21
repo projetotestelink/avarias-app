@@ -11,7 +11,7 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #0B4734, #0D5A3F);">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
@@ -24,20 +24,33 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
         <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #FEDB00, #FFE44D);">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="card-title mb-1 opacity-75">SKUs Cadastrados</h6>
-                        <h2 class="mb-0 fw-bold">{{ total_skus }}</h2>
+                        <h6 class="card-title mb-1 opacity-75">SKUs c/ Avaria</h6>
+                        <h2 class="mb-0 fw-bold">{{ skus_com_avaria }}</h2>
                     </div>
                     <i class="bi bi-upc-scan fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-1 opacity-75">Unidades c/ Avaria</h6>
+                        <h2 class="mb-0 fw-bold">{{ total_unidades_avaria }}</h2>
+                    </div>
+                    <i class="bi bi-boxes fs-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
         <div class="card border-0 shadow-sm text-white" style="background: linear-gradient(135deg, #1a6e52, #0B4734);">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
