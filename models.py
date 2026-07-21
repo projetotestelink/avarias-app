@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime, timezone
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='visualizador')
     is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
 
     avarias = db.relationship('Avaria', backref='usuario', lazy=True)
 
@@ -36,7 +36,7 @@ class SKU(db.Model):
     id = db.Column(db.Integer, db.Identity(always=False), primary_key=True)
     codigo = db.Column(db.String(50), unique=True, nullable=False, index=True)
     descricao = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
 
     avarias = db.relationship('Avaria', backref='sku_rel', lazy=True)
 
@@ -51,7 +51,7 @@ class Localizacao(db.Model):
     endereco = db.Column(db.String(50), unique=True, nullable=False, index=True)
     area = db.Column(db.String(100), nullable=False)
     observacoes = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
 
     avarias = db.relationship('Avaria', backref='localizacao_rel', lazy=True)
     fotos_palete = db.relationship('FotoPalete', backref='localizacao_rel', lazy=True)
@@ -71,9 +71,9 @@ class Avaria(db.Model):
     quantidade = db.Column(db.Integer, nullable=False)
     observacoes = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc),
-                           onupdate=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(),
+                           onupdate=lambda: datetime.now())
 
     fotos = db.relationship('FotoAvaria', backref='avaria_rel', lazy=True, cascade='all, delete-orphan')
 
@@ -87,7 +87,7 @@ class FotoAvaria(db.Model):
     id = db.Column(db.Integer, db.Identity(always=False), primary_key=True)
     avaria_id = db.Column(db.Integer, db.ForeignKey('avarias.id'), nullable=False)
     file_path = db.Column(db.String(300), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
 
 
 class FotoPalete(db.Model):
@@ -98,6 +98,6 @@ class FotoPalete(db.Model):
     file_path = db.Column(db.String(300), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     observacoes = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now())
 
     usuario = db.relationship('User', backref='fotos_palete')
