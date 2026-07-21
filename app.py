@@ -495,12 +495,21 @@ def excluir_localizacao(id):
     loc = db.session.get(Localizacao, id)
     if not loc:
         abort(404)
-    if loc.avarias:
-        flash('Não é possível excluir localização com avarias vinculadas.', 'danger')
+    qtd_avarias = Avaria.query.filter_by(localizacao_id=loc.id).count()
+    qtd_fotos = FotoPalete.query.filter_by(localizacao_id=loc.id).count()
+    if qtd_avarias:
+        flash(f'Não é possível excluir localização com {qtd_avarias} avaria(s) vinculada(s).', 'danger')
         return redirect(url_for('gerenciar_localizacoes'))
-    db.session.delete(loc)
-    db.session.commit()
-    flash('Localização excluída!', 'success')
+    if qtd_fotos:
+        flash(f'Não é possível excluir localização com {qtd_fotos} foto(s) de palete vinculada(s).', 'danger')
+        return redirect(url_for('gerenciar_localizacoes'))
+    try:
+        db.session.delete(loc)
+        db.session.commit()
+        flash('Localização excluída!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao excluir: {str(e)}', 'danger')
     return redirect(url_for('gerenciar_localizacoes'))
 
 

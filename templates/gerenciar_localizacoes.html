@@ -66,12 +66,10 @@
                                     <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editarModal{{ loc.id }}" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    {% if not loc.avarias %}
                                     <form method="POST" action="{{ url_for('excluir_localizacao', id=loc.id) }}"
                                           onsubmit="return confirm('Excluir localização {{ loc.endereco }}?');" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
                                     </form>
-                                    {% endif %}
                                 </td>
                             </tr>
 
