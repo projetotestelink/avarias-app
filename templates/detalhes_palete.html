@@ -5,6 +5,11 @@
     <h4 class="mb-0" style="color: #0B4734;">
         <i class="bi bi-boxes"></i> Palete: {{ localizacao.endereco }}
         <span class="badge ms-2" style="background-color: #FEDB00; color: #000;">{{ localizacao.area }}</span>
+        {% if current_user.role == 'admin' %}
+        <button type="button" class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#editarEnderecoModal" title="Editar endereço">
+            <i class="bi bi-pencil"></i>
+        </button>
+        {% endif %}
     </h4>
     {% if current_user.role != 'visualizador' %}
     <a href="{{ url_for('nova_avaria') }}" class="btn btn-sm text-white fw-bold" style="background-color: #0B4734;">
@@ -75,19 +80,35 @@
 
     <div class="col-md-4">
         <div class="card shadow-sm mb-3">
-            <div class="card-header" style="background-color: #FEDB00;">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #FEDB00;">
                 <h6 class="mb-0"><i class="bi bi-camera"></i> Fotos do Palete</h6>
+                {% if current_user.role == 'admin' %}
+                <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addFotoPaleteModal">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+                {% endif %}
             </div>
             <div class="card-body">
                 {% if fotos %}
                 <div class="row g-2">
                     {% for foto in fotos %}
                     <div class="col-6 mb-2">
-                        <a href="{{ foto.file_path|image_url }}" target="_blank">
-                            <img src="{{ foto.file_path|image_url }}"
-                                 class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover;"
-                                 alt="Foto palete {{ localizacao.endereco }}">
-                        </a>
+                        <div class="position-relative">
+                            <a href="{{ foto.file_path|image_url }}" target="_blank">
+                                <img src="{{ foto.file_path|image_url }}"
+                                     class="img-fluid rounded" style="height: 100px; width: 100%; object-fit: cover;"
+                                     alt="Foto palete {{ localizacao.endereco }}">
+                            </a>
+                            {% if current_user.role == 'admin' %}
+                            <form method="POST" action="{{ url_for('excluir_foto_palete', id=foto.id) }}"
+                                  class="position-absolute top-0 end-0 m-1"
+                                  onsubmit="return confirm('Excluir esta foto?');">
+                                <button type="submit" class="btn btn-sm btn-danger rounded-circle p-0" style="width: 22px; height: 22px; font-size: 12px; line-height: 1;">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                         <small class="d-block text-muted">{{ foto.created_at.strftime('%d/%m/%Y') }}</small>
                     </div>
                     {% endfor %}
@@ -103,5 +124,113 @@
     </div>
 </div>
 
-<a href="{{ url_for('relatorios') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+<div class="d-flex gap-2">
+    <a href="{{ url_for('relatorios') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% if current_user.role == 'admin' %}
+    <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#transferirModal">
+        <i class="bi bi-arrow-left-right"></i> Transferir Dados
+    </button>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="editarEnderecoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('editar_localizacao', id=localizacao.id) }}">
+                <div class="modal-header" style="background-color: #0B4734; color: white;">
+                    <h6 class="modal-title">Editar Endereço</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2">
+                        <small><i class="bi bi-info-circle"></i> Altere o endereço deste palete. As avarias e fotos permanecem vinculadas.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Endereço</label>
+                        <input type="text" name="endereco" class="form-control" value="{{ localizacao.endereco }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Área</label>
+                        <select name="area" class="form-select" required>
+                            <option value="CD" {% if localizacao.area == 'CD' %}selected{% endif %}>CD</option>
+                            <option value="CS" {% if localizacao.area == 'CS' %}selected{% endif %}>CS</option>
+                            <option value="Transporte" {% if localizacao.area == 'Transporte' %}selected{% endif %}>Transporte</option>
+                            <option value="FL 1500" {% if localizacao.area == 'FL 1500' %}selected{% endif %}>FL 1500</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea name="observacoes" class="form-control" rows="2">{{ localizacao.observacoes or '' }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addFotoPaleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('adicionar_foto_palete', endereco=localizacao.endereco) }}" enctype="multipart/form-data">
+                <div class="modal-header" style="background-color: #0B4734; color: white;">
+                    <h6 class="modal-title">Adicionar Fotos ao Palete</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Selecionar Fotos</label>
+                        <input type="file" name="fotos_palete" class="form-control" multiple accept="image/*" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transferirModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('transferir_palete', endereco=localizacao.endereco) }}">
+                <div class="modal-header" style="background-color: #0B4734; color: white;">
+                    <h6 class="modal-title">Transferir Dados do Palete</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning py-2">
+                        <small><i class="bi bi-info-circle"></i> Todas as avarias e fotos de <strong>{{ localizacao.endereco }}</strong> serão movidas para o endereço de destino.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Endereço de Destino</label>
+                        <input type="text" name="destino_endereco" class="form-control" placeholder="Ex: R-01-A-01" required>
+                        <small class="text-muted">Se o endereço já existir, os dados serão agregados. Se não, será criado.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Área (apenas se criar novo endereço)</label>
+                        <select name="destino_area" class="form-select">
+                            <option value="">Selecione...</option>
+                            <option value="CD">CD</option>
+                            <option value="CS">CS</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="FL 1500">FL 1500</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning fw-bold" onclick="return confirm('Confirmar transferência de todos os dados para o novo endereço?');">
+                        <i class="bi bi-arrow-left-right"></i> Transferir
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

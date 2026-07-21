@@ -459,6 +459,31 @@ def gerenciar_localizacoes():
     return render_template('gerenciar_localizacoes.html', form=form, pagination=pagination, search=search)
 
 
+@app.route('/gerenciar/localizacoes/<int:id>/editar', methods=['POST'])
+@login_required
+@admin_required
+def editar_localizacao(id):
+    loc = db.session.get(Localizacao, id)
+    if not loc:
+        abort(404)
+    endereco = request.form.get('endereco', '').strip().upper()
+    area = request.form.get('area', '').strip()
+    observacoes = request.form.get('observacoes', '').strip()
+    if endereco:
+        duplicado = Localizacao.query.filter(
+            Localizacao.endereco == endereco, Localizacao.id != id).first()
+        if duplicado:
+            flash('Endereço já cadastrado!', 'danger')
+            return redirect(url_for('gerenciar_localizacoes'))
+        loc.endereco = endereco
+    if area:
+        loc.area = area
+    loc.observacoes = observacoes or None
+    db.session.commit()
+    flash('Localização atualizada com sucesso!', 'success')
+    return redirect(url_for('gerenciar_localizacoes'))
+
+
 @app.route('/gerenciar/localizacoes/<int:id>/excluir', methods=['POST'])
 @login_required
 @admin_required
@@ -518,6 +543,112 @@ def detalhes_palete(endereco):
                          localizacao=localizacao,
                          avarias=avarias,
                          fotos=fotos)
+
+
+@app.route('/palete/<endereco>/transferir', methods=['POST'])
+@login_required
+@admin_required
+def transferir_palete(endereco):
+    origem = Localizacao.query.filter_by(endereco=endereco.strip().upper()).first_or_404()
+
+    destino_endereco = request.form.get('destino_endereco', '').strip().upper()
+    if not destino_endereco:
+        flash('Informe o endereço de destino.', 'danger')
+        return redirect(url_for('detalhes_palete', endereco=origem.endereco))
+
+    if destino_endereco == origem.endereco:
+        flash('O destino deve ser diferente da origem.', 'danger')
+        return redirect(url_for('detalhes_palete', endereco=origem.endereco))
+
+    destino = Localizacao.query.filter_by(endereco=destino_endereco).first()
+    if not destino:
+        destino_area = request.form.get('destino_area', '').strip()
+        if not destino_area:
+            flash('Informe a área para o novo endereço de destino.', 'danger')
+            return redirect(url_for('detalhes_palete', endereco=origem.endereco))
+        destino = Localizacao(endereco=destino_endereco, area=destino_area)
+        db.session.add(destino)
+        db.session.flush()
+
+    qtd_avarias = Avaria.query.filter_by(localizacao_id=origem.id).count()
+    qtd_fotos = FotoPalete.query.filter_by(localizacao_id=origem.id).count()
+
+    Avaria.query.filter_by(localizacao_id=origem.id).update(
+        {'localizacao_id': destino.id})
+    FotoPalete.query.filter_by(localizacao_id=origem.id).update(
+        {'localizacao_id': destino.id})
+
+    db.session.commit()
+    flash(f'Dados transferidos com sucesso! {qtd_avarias} avaria(s) e {qtd_fotos} foto(s) movidas para {destino.endereco}.', 'success')
+    return redirect(url_for('detalhes_palete', endereco=destino.endereco))
+
+
+@app.route('/foto-palete/<int:id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_foto_palete(id):
+    foto = db.session.get(FotoPalete, id)
+    if not foto:
+        abort(404)
+    endereco = foto.localizacao_rel.endereco
+    db.session.delete(foto)
+    db.session.commit()
+    flash('Foto do palete excluída!', 'success')
+    return redirect(url_for('detalhes_palete', endereco=endereco))
+
+
+@app.route('/foto-avaria/<int:id>/excluir', methods=['POST'])
+@login_required
+@admin_required
+def excluir_foto_avaria(id):
+    foto = db.session.get(FotoAvaria, id)
+    if not foto:
+        abort(404)
+    avaria_id = foto.avaria_id
+    db.session.delete(foto)
+    db.session.commit()
+    flash('Foto do item excluída!', 'success')
+    return redirect(url_for('detalhes_avaria', id=avaria_id))
+
+
+@app.route('/avaria/<int:id>/adicionar-foto', methods=['POST'])
+@login_required
+@admin_required
+def adicionar_foto_avaria(id):
+    avaria = db.session.get(Avaria, id)
+    if not avaria:
+        abort(404)
+    fotos = request.files.getlist('fotos_item')
+    if fotos and any(f.filename for f in fotos):
+        paths = save_photos([f for f in fotos if f.filename], 'fotos_avarias')
+        for path in paths:
+            db.session.add(FotoAvaria(avaria_id=avaria.id, file_path=path))
+        db.session.commit()
+        flash(f'{len(paths)} foto(s) adicionada(s) à avaria!', 'success')
+    else:
+        flash('Selecione pelo menos uma foto.', 'warning')
+    return redirect(url_for('detalhes_avaria', id=avaria.id))
+
+
+@app.route('/palete/<endereco>/adicionar-foto', methods=['POST'])
+@login_required
+@admin_required
+def adicionar_foto_palete(endereco):
+    localizacao = Localizacao.query.filter_by(endereco=endereco.strip().upper()).first_or_404()
+    fotos = request.files.getlist('fotos_palete')
+    if fotos and any(f.filename for f in fotos):
+        paths = save_photos([f for f in fotos if f.filename], 'fotos_paletes')
+        for path in paths:
+            db.session.add(FotoPalete(
+                localizacao_id=localizacao.id,
+                file_path=path,
+                user_id=current_user.id
+            ))
+        db.session.commit()
+        flash(f'{len(paths)} foto(s) adicionada(s) ao palete!', 'success')
+    else:
+        flash('Selecione pelo menos uma foto.', 'warning')
+    return redirect(url_for('detalhes_palete', endereco=localizacao.endereco))
 
 
 @app.route('/gerenciar/usuarios', methods=['GET', 'POST'])

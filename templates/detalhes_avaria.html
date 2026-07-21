@@ -57,33 +57,54 @@
     </div>
 
     <div class="col-md-4">
-        {% if avaria.fotos %}
         <div class="card shadow-sm mb-3">
-            <div class="card-header" style="background-color: #FEDB00;">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #FEDB00;">
                 <h6 class="mb-0"><i class="bi bi-images"></i> Fotos do Item</h6>
+                {% if current_user.role == 'admin' %}
+                <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addFotoAvariaModal">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+                {% endif %}
             </div>
             <div class="card-body">
+                {% if avaria.fotos %}
                 <div class="row g-2">
                     {% for foto in avaria.fotos %}
                     <div class="col-6">
-                        <a href="{{ foto.file_path|image_url }}" target="_blank">
-                            <img src="{{ foto.file_path|image_url }}"
-                                 class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"
-                                 alt="Foto avaria">
-                        </a>
+                        <div class="position-relative">
+                            <a href="{{ foto.file_path|image_url }}" target="_blank">
+                                <img src="{{ foto.file_path|image_url }}"
+                                     class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"
+                                     alt="Foto avaria">
+                            </a>
+                            {% if current_user.role == 'admin' %}
+                            <form method="POST" action="{{ url_for('excluir_foto_avaria', id=foto.id) }}"
+                                  class="position-absolute top-0 end-0 m-1"
+                                  onsubmit="return confirm('Excluir esta foto?');">
+                                <button type="submit" class="btn btn-sm btn-danger rounded-circle p-0" style="width: 22px; height: 22px; font-size: 12px; line-height: 1;">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">
+                    <i class="bi bi-image fs-2 d-block"></i>
+                    Nenhuma foto do item.
+                </p>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
 
-        {% if fotos_palete %}
         <div class="card shadow-sm mb-3">
             <div class="card-header" style="background-color: #0B4734; color: white;">
                 <h6 class="mb-0"><i class="bi bi-palette"></i> Fotos do Palete</h6>
             </div>
             <div class="card-body">
+                {% if fotos_palete %}
                 <div class="row g-2">
                     {% for foto in fotos_palete %}
                     <div class="col-6">
@@ -95,9 +116,14 @@
                     </div>
                     {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">
+                    <i class="bi bi-image fs-2 d-block"></i>
+                    Nenhuma foto do palete.
+                </p>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
     </div>
 </div>
 
@@ -112,5 +138,28 @@
         <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Excluir</button>
     </form>
     {% endif %}
+</div>
+
+<div class="modal fade" id="addFotoAvariaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('adicionar_foto_avaria', id=avaria.id) }}" enctype="multipart/form-data">
+                <div class="modal-header" style="background-color: #0B4734; color: white;">
+                    <h6 class="modal-title">Adicionar Fotos ao Item</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Selecionar Fotos</label>
+                        <input type="file" name="fotos_item" class="form-control" multiple accept="image/*" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

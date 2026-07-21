@@ -62,15 +62,54 @@
                                 <td><a href="{{ url_for('detalhes_palete', endereco=loc.endereco) }}">{{ loc.endereco }}</a></td>
                                 <td><span class="badge" style="background-color: #FEDB00; color: #000;">{{ loc.area }}</span></td>
                                 <td><small>{{ loc.observacoes or '-' }}</small></td>
-                                <td>
+                                <td class="text-nowrap">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editarModal{{ loc.id }}" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
                                     {% if not loc.avarias %}
                                     <form method="POST" action="{{ url_for('excluir_localizacao', id=loc.id) }}"
-                                          onsubmit="return confirm('Excluir localização {{ loc.endereco }}?');">
+                                          onsubmit="return confirm('Excluir localização {{ loc.endereco }}?');" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
                                     </form>
                                     {% endif %}
                                 </td>
                             </tr>
+
+                            <div class="modal fade" id="editarModal{{ loc.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ url_for('editar_localizacao', id=loc.id) }}">
+                                            <div class="modal-header" style="background-color: #0B4734; color: white;">
+                                                <h6 class="modal-title">Editar Localização</h6>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Endereço</label>
+                                                    <input type="text" name="endereco" class="form-control" value="{{ loc.endereco }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Área</label>
+                                                    <select name="area" class="form-select" required>
+                                                        <option value="CD" {% if loc.area == 'CD' %}selected{% endif %}>CD</option>
+                                                        <option value="CS" {% if loc.area == 'CS' %}selected{% endif %}>CS</option>
+                                                        <option value="Transporte" {% if loc.area == 'Transporte' %}selected{% endif %}>Transporte</option>
+                                                        <option value="FL 1500" {% if loc.area == 'FL 1500' %}selected{% endif %}>FL 1500</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Observações</label>
+                                                    <textarea name="observacoes" class="form-control" rows="2">{{ loc.observacoes or '' }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn text-white fw-bold" style="background-color: #0B4734;">Salvar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
                         </tbody>
                     </table>
